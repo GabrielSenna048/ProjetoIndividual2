@@ -1,4 +1,4 @@
-```html
+
 <!DOCTYPE html>
 
 <html lang="pt-BR">
@@ -40,15 +40,20 @@
 
             <h1>O Mentalista</h1>
 
-            <p>
+            <p id="mensagem-boas-vindas">
                 Responda a essas perguntas para saber se realmente é um fã da série
             </p>
-
+            <div id="lista-utilizadores-logados" style="margin-top: 10px; color: green; font-weight: bold;"></div>
         </header>
 
 
         <div class="container">
+            <div class="perguntas"
+                style="margin-top: 30px;padding: 15px; border-radius: 8px;">
+                <h2>Ranking dos usuários !</h2>
 
+                <ol id="lista-ranking" style="padding-left: 20px; margin-top: 15px;"></ol>
+            </div>
 
             <div class="perguntas">
 
@@ -136,257 +141,162 @@
 
 
             <div class="perguntas">
-
-                <h2>
-                    7. Qual bebida Patrick Jane passa a maior parte do tempo a tomar?
-                </h2>
-
+                <h2>7. Qual bebida Patrick Jane passa a maior parte do tempo a tomar?</h2>
                 <select id="q7.select">
-
-                    <option value="">
-                        Carregando...
-                    </option>
-
+                    <option value="">Selecione uma opção...</option>
+                    <option value="cha">Chá</option>
+                    <option value="whisky">Whisky</option>
+                    <option value="refrigerante">Refrigerante</option>
                 </select>
-
             </div>
 
 
             <button onclick="verificarRespostas()">
                 Verificar Respostas
             </button>
+            <button onclick="novoCadastro()">
+                Novo cadastro
+            </button>
 
         </div>
+
+
 
     </div>
 
 
     <script>
 
-        // Abre o cadastro assim que a página carrega
+        var usuarioIdLogado = null;
+
+
         document.getElementById('dialogCadastro').showModal();
 
 
-        // Cadastra o usuário na API
-        function cadastrar() {
-
-            var nome = document.getElementById('nome.input').value;
-
-            var email = document.getElementById('email.input').value;
 
 
-            if (nome == "" || email == "") {
+        function novoCadastro() {
 
-                alert('Por favor, preencha todos os campos.');
-
-                return;
-            }
+            document.getElementById('nome.input').value = "";
+            document.getElementById('email.input').value = "";
 
 
-            var cadastro = {
-
-                nome: nome,
-
-                email: email
-
-            };
-
-
-            fetch('http://localhost:8080/mentalista', {
-
-                method: 'POST',
-
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-
-                body: JSON.stringify(cadastro)
-
-            })
-
-            .then(function (resposta) {
-
-                if (resposta.status == 201) {
-
-                    alert('Cadastro realizado com sucesso!');
-
-                    document
-                        .getElementById('dialogCadastro')
-                        .close();
-
-                } else {
-
-                    alert('Erro ao realizar o cadastro.');
-
-                }
-
-            })
-
-            .catch(function (erro) {
-
-                console.log(erro);
-
-                alert('Não foi possível conectar com a API.');
-
-            });
-
+            document.getElementById('dialogCadastro').showModal();
         }
 
 
-        // Carrega as bebidas pela API
-        // function carregarBebidas() {
 
-        //     fetch('http://localhost:8080/mentalista/bebidas')
+        function cadastrar() {
+            var nome = document.getElementById('nome.input').value;
+            var email = document.getElementById('email.input').value;
 
-        //         .then(function (resposta) {
+            if (nome == "" || email == "") {
+                alert('Por favor, preencha todos os campos.');
+                return;
+            }
 
-        //             return resposta.json();
+            var cadastro = {
+                nome: nome,
+                email: email
+            };
 
-        //         })
-
-        //         .then(function (bebidas) {
-
-        //             var select =
-        //                 document.getElementById('q7.select');
-
-        //             select.innerHTML =
-        //                 '<option value="">Selecione uma opção...</option>';
-
-
-        //             for (var i = 0; i < bebidas.length; i++) {
-
-        //                 select.innerHTML +=
-        //                     `<option value="${bebidas[i].valor}">
-        //                         ${bebidas[i].nome}
-        //                     </option>`;
-
-        //             }
-
-        //         })
-
-        //         .catch(function (erro) {
-
-        //             console.log(erro);
-
-        //         });
-
-        // }
+            fetch('http://localhost:8080/mentalista', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(cadastro)
+            })
+                .then(function (resposta) {
+                    if (resposta.status == 201) {
+                        return resposta.json();
+                    } else {
+                        throw new Error('Erro ao realizar o cadastro.');
+                    }
+                })
+                .then(function (dadosDoUsuario) {
+                    alert('Cadastro realizado com sucesso!');
 
 
-        // // Carrega as bebidas quando a página abre
-        // carregarBebidas();
+                    usuarioIdLogado = dadosDoUsuario.id;
 
 
-        // function verificarRespostas() {
-
-        //     var acertos = 0;
-
-
-        //     // Q1
-        //     var r1 =
-        //         document
-        //             .getElementById('q1.input')
-        //             .value
-        //             .trim()
-        //             .toLowerCase();
-
-        //     if (r1 === 'patrick jane' || r1 === 'patrick') {
-
-        //         acertos++;
-
-        //     }
+                    document.getElementById('lista-utilizadores-logados').innerHTML =
+                        `<p>👤 Usuário: ${dadosDoUsuario.nome}</p>`;
 
 
-        //     // Q2
-        //     var r2Marcados =
-        //         document.querySelectorAll('input[name="q2"]:checked');
+                    document.getElementById('dialogCadastro').close();
+                })
+                .catch(function (erro) {
+                    console.log(erro);
+                    alert('Não foi possível realizar o cadastro.');
+                });
+        }
+        function verificarRespostas() {
+            if (!usuarioIdLogado) {
+                alert("Por favor, faça o cadastro antes de enviar o quiz!");
+                return;
+            }
 
-        //     if (
-        //         r2Marcados.length === 1 &&
-        //         r2Marcados[0].value === 'mccallister'
-        //     ) {
+            var r2Marcado = document.querySelector('input[name="q2"]:checked');
+            var q2Valor = r2Marcado ? r2Marcado.value : "";
+            var q6Valor = document.getElementById('q6.input').value;
 
-        //         acertos++;
+            var pacoteRespostas = {
+                id: usuarioIdLogado, 
+                q1Input: document.getElementById('q1.input').value,
+                q2Checkbox: q2Valor,
+                q3Input: document.getElementById('q3.input').value,
+                q4Input: document.getElementById('q4.input').value,
+                q5Input: document.getElementById('q5.input').value,
+                q6Input: q6Valor !== "" ? parseInt(q6Valor) : null,
+                q7Select: document.getElementById('q7.select').value
+            };
 
-        //     }
+            fetch('http://localhost:8080/mentalista/validar-quiz', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(pacoteRespostas)
+            })
+                .then(resposta => resposta.json())
+                .then(totalAcertos => {
+                    alert(`Pontuação salva no banco de dados! Você acertou ${totalAcertos} de 7.`);
+                    carregarRanking(); 
+                })
+                .catch(erro => console.error(erro));
+        }
 
+        function carregarRanking() {
+            fetch('http://localhost:8080/mentalista/ranking')
+                .then(function (resposta) {
+                    if (resposta.status == 200) return resposta.json();
+                    return [];
+                })
+                .then(function (ranking) {
+                    var listaOL = document.getElementById('lista-ranking');
+                    listaOL.innerHTML = ""; 
 
-        //     // Q3
-        //     var r3 =
-        //         document
-        //             .getElementById('q3.input')
-        //             .value
-        //             .trim()
-        //             .toLowerCase();
-
-        //     if (r3 === 'red john' || r3 === 'redjohn') {
-
-        //         acertos++;
-
-        //     }
-
-
-        //     // Q4
-        //     var r4 =
-        //         document
-        //             .getElementById('q4.input')
-        //             .value
-        //             .trim()
-        //             .toLowerCase();
-
-        //     if (
-        //         r4 === 'associação blake' ||
-        //         r4 === 'associacao blake' ||
-        //         r4 === 'blake association'
-        //     ) {
-
-        //         acertos++;
-
-        //     }
-
-
-        //     // Q5
-        //     var r5 =
-        //         document
-        //             .getElementById('q5.input')
-        //             .value
-        //             .trim()
-        //             .toLowerCase();
-
-        //     if (r5 === 'simon baker' || r5 === 'simon') {
-
-        //         acertos++;
-
-        //     }
-
-
-        //     // Q6
-        //     var r6 =
-        //         document.getElementById('q6.input').value;
-
-        //     if (r6 === '5') {
-
-        //         acertos++;
-
-        //     }
+                    for (var i = 0; i < ranking.length; i++) {
+                        
+                        listaOL.innerHTML += `<li style="color: #333; margin-bottom: 8px;">
+                ${ranking[i].nome} — Acertos: <strong>${ranking[i].q1Input}</strong>
+            </li>`;
+                    }
+                })
+                .catch(function (erro) {
+                    console.error("Erro ao processar ranking:", erro);
+                });
+        }
 
 
-        //     // Q7
-        //     var r7 =
-        //         document.getElementById('q7.select').value;
-
-        //     if (r7 === 'cha') {
-
-        //         acertos++;
-
-        //     }
 
 
-        //     alert(
-        //         `Quiz concluído! Você acertou ${acertos} de 7 perguntas.`
-        //     );
 
-        // }
+
+
+
+
+
 
     </script>
 
