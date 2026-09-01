@@ -3,6 +3,7 @@ package school.sptech.back_end;
 public class BackEnd {
     private String nome;
     private String email;
+    private Integer id;
     private String q1Input;       // Nome do protagonista
     private String q2Checkbox;    // Resposta selecionada no checkbox (Red John)
     private String q3Input;       // Assassino em série
@@ -11,9 +12,10 @@ public class BackEnd {
     private Integer q6Input;      // Quantidade de membros (campo tipo number)
     private String q7Select;     // Opção selecionada no select (Bebida)
 
-    public BackEnd(String nome, String email, String q1Input, String q2Checkbox, String q3Input, String q4Input, String q5Input, Integer q6Input, String q7Select) {
+    public BackEnd(String nome, String email, Integer id, String q1Input, String q2Checkbox, String q3Input, String q4Input, String q5Input, Integer q6Input, String q7Select) {
         this.nome = nome;
         this.email = email;
+        this.id = id;
         this.q1Input = q1Input;
         this.q2Checkbox = q2Checkbox;
         this.q3Input = q3Input;
@@ -40,6 +42,14 @@ public class BackEnd {
 
     public void setEmail(String email) {
         this.email = email;
+    }
+
+    public Integer getId() {
+        return id;
+    }
+
+    public void setId(Integer id) {
+        this.id = id;
     }
 
     public String getQ1Input() {
