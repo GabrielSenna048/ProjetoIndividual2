@@ -1,4 +1,3 @@
-
 <!DOCTYPE html>
 
 <html lang="pt-BR">
@@ -48,8 +47,7 @@
 
 
         <div class="container">
-            <div class="perguntas"
-                style="margin-top: 30px;padding: 15px; border-radius: 8px;">
+            <div class="perguntas" style="margin-top: 30px;padding: 15px; border-radius: 8px;">
                 <h2>Ranking dos usuários !</h2>
 
                 <ol id="lista-ranking" style="padding-left: 20px; margin-top: 15px;"></ol>
@@ -167,31 +165,24 @@
 
     <script>
 
-        var usuarioIdLogado = null;
 
+        var usuarioIdLogado = null;
 
         document.getElementById('dialogCadastro').showModal();
 
-
-
-
         function novoCadastro() {
-
             document.getElementById('nome.input').value = "";
             document.getElementById('email.input').value = "";
 
-
             document.getElementById('dialogCadastro').showModal();
         }
-
-
 
         function cadastrar() {
             var nome = document.getElementById('nome.input').value;
             var email = document.getElementById('email.input').value;
 
             if (nome == "" || email == "") {
-                alert('Por favor, preencha todos os campos.');
+                alert("Por favor, preencha todos os campos.");
                 return;
             }
 
@@ -211,82 +202,107 @@
                     if (resposta.status == 201) {
                         return resposta.json();
                     } else {
-                        throw new Error('Erro ao realizar o cadastro.');
+                        throw new Error("Erro ao realizar o cadastro.");
                     }
                 })
                 .then(function (dadosDoUsuario) {
-                    alert('Cadastro realizado com sucesso!');
-
+                    alert("Cadastro realizado com sucesso!");
 
                     usuarioIdLogado = dadosDoUsuario.id;
 
-
                     document.getElementById('lista-utilizadores-logados').innerHTML =
-                        `<p>👤 Usuário: ${dadosDoUsuario.nome}</p>`;
-
+                        "<p>👤 Usuário: " + dadosDoUsuario.nome + "</p>";
 
                     document.getElementById('dialogCadastro').close();
                 })
                 .catch(function (erro) {
                     console.log(erro);
-                    alert('Não foi possível realizar o cadastro.');
+                    alert("Não foi possível realizar o cadastro.");
                 });
         }
+
         function verificarRespostas() {
-            if (!usuarioIdLogado) {
+
+            if (usuarioIdLogado == null) {
                 alert("Por favor, faça o cadastro antes de enviar o quiz!");
                 return;
             }
 
-            var r2Marcado = document.querySelector('input[name="q2"]:checked');
-            var q2Valor = r2Marcado ? r2Marcado.value : "";
+            var q2 = document.getElementsByName("q2");
+            var q2Valor = "";
+
+            for (var i = 0; i < q2.length; i++) {
+                if (q2[i].checked) {
+                    q2Valor = q2[i].value;
+                }
+            }
+
             var q6Valor = document.getElementById('q6.input').value;
 
             var pacoteRespostas = {
-                id: usuarioIdLogado, 
+                id: usuarioIdLogado,
                 q1Input: document.getElementById('q1.input').value,
                 q2Checkbox: q2Valor,
                 q3Input: document.getElementById('q3.input').value,
                 q4Input: document.getElementById('q4.input').value,
                 q5Input: document.getElementById('q5.input').value,
-                q6Input: q6Valor !== "" ? parseInt(q6Valor) : null,
+                q6Input: q6Valor == "" ? null : parseInt(q6Valor),
                 q7Select: document.getElementById('q7.select').value
             };
 
             fetch('http://localhost:8080/mentalista/validar-quiz', {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
+                headers: {
+                    'Content-Type': 'application/json'
+                },
                 body: JSON.stringify(pacoteRespostas)
             })
-                .then(resposta => resposta.json())
-                .then(totalAcertos => {
-                    alert(`Pontuação salva no banco de dados! Você acertou ${totalAcertos} de 7.`);
-                    carregarRanking(); 
+                .then(function (resposta) {
+                    return resposta.json();
                 })
-                .catch(erro => console.error(erro));
+                .then(function (totalAcertos) {
+                    alert("Pontuação salva no banco de dados! Você acertou " + totalAcertos + " de 7.");
+
+                    carregarRanking();
+                })
+                .catch(function (erro) {
+                    console.log(erro);
+                    alert("Erro ao enviar o quiz.");
+                });
         }
 
         function carregarRanking() {
+
             fetch('http://localhost:8080/mentalista/ranking')
                 .then(function (resposta) {
-                    if (resposta.status == 200) return resposta.json();
+
+                    if (resposta.status == 200) {
+                        return resposta.json();
+                    }
+
                     return [];
                 })
                 .then(function (ranking) {
+
                     var listaOL = document.getElementById('lista-ranking');
-                    listaOL.innerHTML = ""; 
+
+                    listaOL.innerHTML = "";
 
                     for (var i = 0; i < ranking.length; i++) {
-                        
-                        listaOL.innerHTML += `<li style="color: #333; margin-bottom: 8px;">
-                ${ranking[i].nome} — Acertos: <strong>${ranking[i].q1Input}</strong>
-            </li>`;
+
+                        listaOL.innerHTML +=
+                            "<li style='color: #333; margin-bottom: 8px;'>" +
+                            ranking[i].nome +
+                            " — Acertos: <strong>" +
+                            ranking[i].q1Input +
+                            "</strong></li>";
                     }
                 })
                 .catch(function (erro) {
-                    console.error("Erro ao processar ranking:", erro);
+                    console.log("Erro ao processar ranking:", erro);
                 });
         }
+     
 
 
 

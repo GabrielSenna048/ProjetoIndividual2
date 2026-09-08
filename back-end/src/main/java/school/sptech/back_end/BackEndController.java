@@ -1,7 +1,7 @@
 
 package school.sptech.back_end;
 
-import org.springframework.dao.EmptyResultDataAccessException;
+
 import org.springframework.http.ResponseEntity;
 import org.springframework.jdbc.core.BeanPropertyRowMapper;
 import org.springframework.jdbc.core.JdbcTemplate;
